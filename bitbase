@@ -30,14 +30,18 @@ echo "| coin   | $coin"
 echo "| rate   | $rate eur"
 if [ -n "$rub" ] &&  [ -n "$get" ];
 then
-  echo "$rub" "$get" "$amount" | awk '{print "| rate   | "  $1/$2/$3 " rub"}'
+  echo "$rub" "$get" "$rate" | awk '{print "| rate   | "  $1/$2/$3 " rub"}'
 fi
 echo "+--------+--------------------"
 echo "| amount | $amount"
 echo "+--------+--------------------"
-echo "$rate" "$sell_commission" | awk '{print "| buy    | " $1*$2 " eur"}'
-echo "$amount" "$rate" "$sell_commission" | awk '{print "| get    | "  $1/$2/$3}'
+echo "$rate" "$buy_commission" "$coin" | awk '{print "| buy    | " $1*$2 " eur/"$3}'
+echo "$amount" "$rate" "$buy_commission" | awk '{print "| get    | "  $1/$2/$3}'
 echo "+--------+--------------------"
-echo "$rate" "$sell_commission" | awk '{print "| sell   | " $1/$2 " eur"}'
+echo "$rate" "$sell_commission" "$coin" | awk '{print "| sell   | " $1/$2 " eur/"$3}'
+if [ -n "$rub" ] &&  [ -n "$get" ];
+then
+  echo "$rub" "$get" "$rate" "$sell_commission" | awk '{print "| rate   | "  $1/$2/$3*$4 " rub/eur"}'
+fi
 echo "$amount" "$rate" "$sell_commission" | awk '{print "| get    | "  $1/$2*$3}'
 echo "+--------+--------------------"
