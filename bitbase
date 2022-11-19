@@ -1,9 +1,9 @@
 #!/bin/bash
 
 coin=${coin:-LTC}
-amount=${amount:-50}
-#rub=${rub:-1}
-#get=${get:-1}
+amount=${amount:-1}
+# E - Efectivo, T - Transferencia, TG - buys with Tarjeta
+how=${how:-E}
 
 while [ $# -gt 0 ]; do
 
@@ -17,31 +17,43 @@ done
 
 coin=$(echo "$coin" | tr '[:lower:]' '[:upper:]')
 
+# Get current count rate
 rate=$(curl -s api.bitbase.es/coins/"$coin" | jq '.price')
-sell_commission=1.1111111
-buy_commission=1.098
 
-echo ""
-echo "+--------+--------------------"
-date +"| date   | %Y.%m.%d"
-date +"| time   | %T"
-echo "+--------+--------------------"
-echo "| coin   | $coin"
-echo "| rate   | $rate eur"
+# Raw commissions
+raw_fee=$(cat ./fee/"$coin".json)
+
+# Commissions for money transfer path
+fee=$(echo "$raw_fee" | jq '.'"$how")
+
+commission=$(echo "$fee"| awk '{print 1-$1}')
+
+buy_rate=$(echo "$rate" "$commission" | awk '{print $1*$2}')
+buy_coin=$(echo "$amount" "$commission" "$rate" | awk '{print $1*$2/$3}')
+sell_rate=$(echo "$rate" "$commission" | awk '{print $1/$2}')
+sell_coin=$(echo "$amount" "$commission" "$rate" | awk '{print $1/$2/$3}')
+
+
+echo  ""
+echo  "+--------+----------------------"
+date +"| date   | %Y.%m.%d %T"
+echo  "+--------+----------------------"
+echo  "| coin   | $coin"
+echo  "| rate   | $rate eur/$coin"
 if [ -n "$rub" ] &&  [ -n "$get" ];
 then
-  echo "$rub" "$get" "$rate" | awk '{print "| rate   | "  $1/$2/$3 " rub"}'
+  echo "$rub" "$get" "$rate" | awk '{print "| rate   | "  $1/$2/$3 " rub/eur"}'
 fi
-echo "+--------+--------------------"
-echo "| amount | $amount"
-echo "+--------+--------------------"
-echo "$rate" "$buy_commission" "$coin" | awk '{print "| buy    | " $1*$2 " eur/"$3}'
-echo "$amount" "$rate" "$buy_commission" | awk '{print "| get    | "  $1/$2/$3}'
-echo "+--------+--------------------"
-echo "$rate" "$sell_commission" "$coin" | awk '{print "| sell   | " $1/$2 " eur/"$3}'
+echo  "+--------+----------------------"
+echo  "| amount | $amount eur"
+echo  "+--------+----------------------"
+echo  "| rate   | $buy_rate eur/$coin"
+echo  "| get    | $buy_coin $coin"
+echo  "+--------+----------------------"
+echo  "| rate   | $sell_rate eur/$coin"
 if [ -n "$rub" ] &&  [ -n "$get" ];
 then
-  echo "$rub" "$get" "$rate" "$sell_commission" | awk '{print "| rate   | "  $1/$2/$3*$4 " rub/eur"}'
+  echo "$rub" "$get" "$rate" "$commission" | awk '{print "| rate   | "  $1/$2/$3/$4 " rub/eur"}'
 fi
-echo "$amount" "$rate" "$sell_commission" | awk '{print "| get    | "  $1/$2*$3}'
-echo "+--------+--------------------"
+echo  "| get    | $sell_coin $coin"
+echo  "+--------+----------------------"
