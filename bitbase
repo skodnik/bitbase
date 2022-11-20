@@ -109,6 +109,13 @@ date=$(date +"%Y.%m.%d %T UTC%z")
 echo  " "
 echo  -e " ${BGreen}$date${NOCOLOR}"
 echo  " "
+if [ -n "$rub" ] &&  [ -n "$get" ];
+then
+  rub_rate=$(echo "$rub" "$get" "$rate" | awk '{print $1/$2}')
+  echo  -e " rate  ${BYellow}$rub_rate${NOCOLOR} rub/$coin"
+  echo  -e " swap  ${BYellow}$rub${NOCOLOR} rub -> ${BYellow}$get${NOCOLOR} $coin"
+  echo  " "
+fi
 echo  " coin  $coin"
 echo  -e " rate  ${BYellow}$rate${NOCOLOR} eur/$coin"
 if [ -n "$rub" ] &&  [ -n "$get" ];
