@@ -112,8 +112,9 @@ echo  " "
 if [ -n "$rub" ] &&  [ -n "$get" ];
 then
   rub_rate=$(echo "$rub" "$get" "$rate" | awk '{print $1/$2}')
+  coin_rate=$(echo "$get" "$buy_rate" | awk '{print $1*$2}')
   echo  -e " rate  ${BYellow}$rub_rate${NOCOLOR} rub/$coin"
-  echo  -e " swap  ${BYellow}$rub${NOCOLOR} rub -> ${BYellow}$get${NOCOLOR} $coin"
+  echo  -e " swap  ${BYellow}$rub${NOCOLOR} rub -> ${BYellow}$get${NOCOLOR} $coin -> ${BYellow}$coin_rate${NOCOLOR} eur"
   echo  " "
 fi
 echo  " coin  $coin"
